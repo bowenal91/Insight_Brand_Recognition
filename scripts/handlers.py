@@ -46,6 +46,7 @@ class Image_Handler:
             coeffs = (1,m,-xshift if m>0 else 0,0,1,0)
 
             self.logo_transformed = self.logo.transform((new_width,height),Image.AFFINE,coeffs,Image.BICUBIC)
+            #print(self.logo_transformed.size)
 
         else:
             #Perform perspective transformation
@@ -57,7 +58,7 @@ class Image_Handler:
             else:
                 width_shift = 0
                 height_shift = height*np.random.uniform(0.0,0.4)
-            print((width_shift,height_shift))
+            #print((width_shift,height_shift))
             r = np.random.uniform()
             if r < 0.5:
                 coeffs = find_coeffs([(0,0), (width,height_shift), (width_shift,height), (width-width_shift,height-height_shift)],
@@ -68,17 +69,34 @@ class Image_Handler:
 
             self.logo_transformed = self.logo.transform((width,height),Image.PERSPECTIVE,coeffs,Image.BICUBIC)
 
+
     def add_logo(self):
         #Picks a random location to add on the logo image
         #If the logo pixel at a given location is pure black, then we only use the background pixel value at that point
         bg_px = img_to_array(self.bg)
-        logo_px = img_to_array(self.logo)
+        logo_px = img_to_array(self.logo_transformed)
+        print(logo_px.shape)
+        print(self.logo_transformed.size)
+        #Generate a random pixel location to add it in
+        xlim = self.bg.size[0] - self.logo_transformed.size[0]
+        ylim = self.bg.size[1] - self.logo_transformed.size[1]
+        r_x = np.random.randint(xlim)
+        r_y = np.random.randint(ylim)
+        print(r_x,r_y)
 
+        for j in range(self.logo_transformed.size[0]-1):
+            for i in range(self.logo_transformed.size[1]-1):
+                #print(i,j)
+                if logo_px[i][j][0] != 0 or logo_px[i][j][1] != 0 or logo_px[i][j][2] != 0:
+                    bg_px[r_y+i,r_x+j,:] = logo_px[i,j,:]
+
+        self.bg = array_to_img(bg_px)
 
 if __name__ == '__main__':
-    A = Image_Handler("Soccer.jpg",(400,400),(200,200))
-    A.create_logo("Visa.png")
+    A = Image_Handler("Soccer.jpg",(1140,641),(70,70))
+    A.create_logo("Coke.jpg")
     A.transform_logo()
-    A.logo.show()
-    A.logo_transformed.show()
-
+    #A.logo.show()
+    #A.logo_transformed.show()
+    A.add_logo()
+    A.bg.show()
