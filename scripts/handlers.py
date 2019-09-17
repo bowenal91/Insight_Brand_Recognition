@@ -3,10 +3,10 @@ from PIL import Image
 from keras.preprocessing.image import ImageDataGenerator,array_to_img,img_to_array,load_img
 
 
-def find_ceoffs(pa,pb):
+def find_coeffs(pa,pb):
     matrix = []
     for p1,p2 in zip(pa,pb):
-        matrix.append([p1[0],p1[2],1,0,0,0,-p2[0]*p1[0],-p2[0]*p1[1]])
+        matrix.append([p1[0],p1[1],1,0,0,0,-p2[0]*p1[0],-p2[0]*p1[1]])
         matrix.append([0,0,0,p1[0],p1[1],1,-p2[1]*p1[0],-p2[1]*p1[1]])
 
     A = np.matrix(matrix,dtype=np.float)
@@ -27,38 +27,44 @@ class Image_Handler:
         self.logo = None
         self.logo_transformed = None
 
-    def add_logo(self,filename):
+    def create_logo(self,filename):
         self.logo = load_img(filename)
         self.logo = self.logo.resize(self.logo_size)
 
     def transform_logo(self):
         #Perform a single random transformation on the logo
         #These parameters create bounds for the random transformation
-        width = logo_size[0]
-        height = logo_size[1]
+        width = self.logo_size[0]
+        height = self.logo_size[1]
 
-        if np.random.uniform() < 1.0:
+        if np.random.uniform() < 0.5:
             #perform affine transformation
-
-            m = -0.5
+            print("AFFINE")
+            m = np.random.uniform(-0.9,0.9)
             xshift = abs(m)*width
             new_width = width + int(round(xshift))
             coeffs = (1,m,-xshift if m>0 else 0,0,1,0)
 
-            self.logo_transformed = self.logo.tranform((width,height),Image.AFFINE,coeffs,Image.BICUBIC)
+            self.logo_transformed = self.logo.transform((new_width,height),Image.AFFINE,coeffs,Image.BICUBIC)
 
         else:
             #Perform perspective transformation
+            print("PERSPECTIVE")
             r = np.random.uniform()
             if r < 0.5:
-                width_shift = width*np.random.uniform(0.8,1.0)
+                width_shift = width*np.random.uniform(0.0,0.4)
                 height_shift = 0
             else:
                 width_shift = 0
-                height_shift = height*np.random.uniform(0.8,1.0)
-            coeffs = find_coeffs(
-                    [(0,0), (width,0), (0,height), (width,height)],
-                    [(width_shift,height_shift), (width-width_shift,height_shift), (width_shift,height-height_shift), (width-width_shift,height-height_shift)])
+                height_shift = height*np.random.uniform(0.0,0.4)
+            print((width_shift,height_shift))
+            r = np.random.uniform()
+            if r < 0.5:
+                coeffs = find_coeffs([(0,0), (width,height_shift), (width_shift,height), (width-width_shift,height-height_shift)],
+                    [(0,0), (width,0), (0,height), (width,height)])
+            else:
+                coeffs = find_coeffs([(width_shift,height_shift), (width-width_shift,0), (0,height-height_shift), (width,height)],
+                    [(0,0), (width,0), (0,height), (width,height)])
 
             self.logo_transformed = self.logo.transform((width,height),Image.PERSPECTIVE,coeffs,Image.BICUBIC)
 
@@ -69,4 +75,10 @@ class Image_Handler:
         logo_px = img_to_array(self.logo)
 
 
+if __name__ == '__main__':
+    A = Image_Handler("Soccer.jpg",(400,400),(200,200))
+    A.create_logo("Visa.png")
+    A.transform_logo()
+    A.logo.show()
+    A.logo_transformed.show()
 
