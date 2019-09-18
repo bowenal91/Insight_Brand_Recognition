@@ -18,22 +18,32 @@ def find_coeffs(pa,pb):
 #Class to manage images and prepare them for training
 
 class Image_Handler:
-    def __init__(self, filename, bg_size, logo_size):
+    def __init__(self, filename, bg_size, prop):
         self.bg_static = load_img(filename)
         self.bg = load_img(filename)
         self.bg = self.bg.resize(bg_size)
         self.pix_bg = img_to_array(self.bg)
-        self.logo_size = logo_size
+
+        self.prop = prop
+        #self.logo_size = (int(prop*self.bg.size[0]),int(prop*self.bg.size[1]))
+        self.logo_size = None
         self.logo = None
         self.logo_transformed = None
+        self.label_list = []
 
     def create_logo(self,filename):
         self.logo = load_img(filename)
+        a = self.prop*float(self.bg.size[0])
+        b = float(self.logo.size[1])/float(self.logo.size[0])
+        b = int(a*b)
+        a = int(a)
+        self.logo_size = (a,b)
         self.logo = self.logo.resize(self.logo_size)
 
     def transform_logo(self):
         #Perform a single random transformation on the logo
         #These parameters create bounds for the random transformation
+
         width = self.logo_size[0]
         height = self.logo_size[1]
 
@@ -93,14 +103,21 @@ class Image_Handler:
         r_x = np.random.randint(xlim)
         r_y = np.random.randint(ylim)
         #print(r_x,r_y)
-
+        r = np.random.randint(255)
+        g = np.random.randint(255)
+        b = np.random.randint(255)
         for j in range(self.logo_transformed.size[0]-1):
             for i in range(self.logo_transformed.size[1]-1):
                 #print(i,j)
                 if logo_px[i][j][0] != 0 or logo_px[i][j][1] != 0 or logo_px[i][j][2] != 0:
-                    bg_px[r_y+i,r_x+j,:] = logo_px[i,j,:]
+                    #bg_px[r_y+i,r_x+j,:] = logo_px[i,j,:]
+                    bg_px[r_y+i,r_x+j,:] = (r,g,b)
 
         self.bg = array_to_img(bg_px)
+
+        #Generate a label and add it to the list
+
+
 
 def generate_test_image(img_data, n_logo):
     #Generates a new image with the logo superimposed n_logo times
@@ -110,10 +127,8 @@ def generate_test_image(img_data, n_logo):
     return img_data.bg
 
 
-
-
 if __name__ == '__main__':
-    A = Image_Handler("Soccer.jpg",(1140,641),(70,30))
+    A = Image_Handler("Soccer.jpg",(1140,641),0.06)
     A.create_logo("Coke.jpg")
     #A.transform_logo()
     #A.logo.show()
