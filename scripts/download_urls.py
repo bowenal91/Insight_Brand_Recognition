@@ -22,6 +22,7 @@ for i,url in enumerate(rows):
         f.write(r.content)
         f.close()
         total+= 1
+        print("Download Successful"+str(total))
 
     except:
         print("Error Downloading a file")
