@@ -39,7 +39,7 @@ class Image_Handler:
 
         if np.random.uniform() < 0.5:
             #perform affine transformation
-            print("AFFINE")
+            #print("AFFINE")
             m = np.random.uniform(-0.9,0.9)
             xshift = abs(m)*width
             new_width = width + int(round(xshift))
@@ -50,7 +50,7 @@ class Image_Handler:
 
         else:
             #Perform perspective transformation
-            print("PERSPECTIVE")
+            #print("PERSPECTIVE")
             r = np.random.uniform()
             if r < 0.5:
                 width_shift = width*np.random.uniform(0.0,0.4)
@@ -69,20 +69,30 @@ class Image_Handler:
 
             self.logo_transformed = self.logo.transform((width,height),Image.PERSPECTIVE,coeffs,Image.BICUBIC)
 
+        #Randomly rotate the resultant image
+        theta = np.random.uniform(-90.0,90.0)
+        self.logo_transformed = self.logo_transformed.rotate(theta,expand=True)
+
+        #Randomly resize the image so that it takes up a different amount of space
+        current_size = self.logo_transformed.size
+        r1 = int(np.random.uniform(0.2,1.0)*current_size[0])
+        r2 = int(np.random.uniform(0.2,1.0)*current_size[1])
+        self.logo_transformed = self.logo_transformed.resize((r1,r2))
+
 
     def add_logo(self):
         #Picks a random location to add on the logo image
         #If the logo pixel at a given location is pure black, then we only use the background pixel value at that point
         bg_px = img_to_array(self.bg)
         logo_px = img_to_array(self.logo_transformed)
-        print(logo_px.shape)
-        print(self.logo_transformed.size)
+        #print(logo_px.shape)
+        #print(self.logo_transformed.size)
         #Generate a random pixel location to add it in
         xlim = self.bg.size[0] - self.logo_transformed.size[0]
         ylim = self.bg.size[1] - self.logo_transformed.size[1]
         r_x = np.random.randint(xlim)
         r_y = np.random.randint(ylim)
-        print(r_x,r_y)
+        #print(r_x,r_y)
 
         for j in range(self.logo_transformed.size[0]-1):
             for i in range(self.logo_transformed.size[1]-1):
@@ -92,11 +102,25 @@ class Image_Handler:
 
         self.bg = array_to_img(bg_px)
 
+def generate_test_image(img_data, n_logo):
+    #Generates a new image with the logo superimposed n_logo times
+    for i in range(n_logo):
+        img_data.transform_logo()
+        img_data.add_logo()
+    return img_data.bg
+
+
+
+
 if __name__ == '__main__':
-    A = Image_Handler("Soccer.jpg",(1140,641),(70,70))
+    A = Image_Handler("Soccer.jpg",(1140,641),(70,30))
     A.create_logo("Coke.jpg")
-    A.transform_logo()
+    #A.transform_logo()
     #A.logo.show()
     #A.logo_transformed.show()
-    A.add_logo()
-    A.bg.show()
+    #A.add_logo()
+    #A.bg.show()
+    stuff = img_to_array(A.logo)
+    #print(stuff[0,0,:])
+    new_img = generate_test_image(A,20)
+    new_img.show()
