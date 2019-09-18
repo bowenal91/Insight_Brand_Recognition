@@ -5,9 +5,9 @@ import os
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-u","--urls",required=True,
-        help="./urls.txt")
+        help="locatiion of url file")
 ap.add_argument("-o","--output",required=True,
-        help="./Google_Images/")
+        help="Directory in which to place images")
 args = vars(ap.parse_args())
 
 rows = open(args["urls"]).read().strip().split("\n")
