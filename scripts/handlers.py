@@ -138,9 +138,10 @@ def generate_test_image(img_data, n_logo):
     return img_data
 
 
+
 if __name__ == '__main__':
-    A = Image_Handler("Soccer.jpg",(1140,641),0.06)
-    A.create_logo("Coke.jpg")
+    A = Image_Handler("Soccer.jpg",(1140,641),0.1)
+    A.create_logo("Visa.png")
     #A.transform_logo()
     #A.logo.show()
     #A.logo_transformed.show()
