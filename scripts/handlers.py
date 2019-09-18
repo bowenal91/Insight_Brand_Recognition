@@ -85,8 +85,8 @@ class Image_Handler:
 
         #Randomly resize the image so that it takes up a different amount of space
         current_size = self.logo_transformed.size
-        r1 = int(np.random.uniform(0.2,1.0)*current_size[0])
-        r2 = int(np.random.uniform(0.2,1.0)*current_size[1])
+        r1 = int(np.random.uniform(0.2,1.4)*current_size[0])
+        r2 = int(np.random.uniform(0.2,1.4)*current_size[1])
         self.logo_transformed = self.logo_transformed.resize((r1,r2))
 
 
@@ -116,7 +116,18 @@ class Image_Handler:
         self.bg = array_to_img(bg_px)
 
         #Generate a label and add it to the list
+        img_x = float(self.bg.size[0])
+        img_y = float(self.bg.size[1])
 
+        label = [0,float(r_x)/img_x, float(r_y)/img_y, float(self.logo_transformed.size[0])/img_x, float(self.logo_transformed.size[1])/img_y]
+        self.label_list.append(label)
+
+    def print_label(self):
+        N = len(self.label_list)
+        with open("label_test.txt","w") as f:
+            for l in self.label_list:
+                s = "{}\t{}\t{}\t{}\t{}\n".format(l[0],l[1],l[2],l[3],l[4])
+                f.write(s)
 
 
 def generate_test_image(img_data, n_logo):
@@ -124,7 +135,7 @@ def generate_test_image(img_data, n_logo):
     for i in range(n_logo):
         img_data.transform_logo()
         img_data.add_logo()
-    return img_data.bg
+    return img_data
 
 
 if __name__ == '__main__':
@@ -138,4 +149,5 @@ if __name__ == '__main__':
     stuff = img_to_array(A.logo)
     #print(stuff[0,0,:])
     new_img = generate_test_image(A,20)
-    new_img.show()
+    new_img.print_label()
+    new_img.bg.show()
