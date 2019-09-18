@@ -18,10 +18,10 @@ def find_coeffs(pa,pb):
 #Class to manage images and prepare them for training
 
 class Image_Handler:
-    def __init__(self, filename, bg_size, prop):
+    def __init__(self, filename,  prop):
         self.bg_static = load_img(filename)
         self.bg = load_img(filename)
-        self.bg = self.bg.resize(bg_size)
+        #self.bg = self.bg.resize(bg_size)
         self.pix_bg = img_to_array(self.bg)
 
         self.prop = prop
@@ -80,7 +80,7 @@ class Image_Handler:
             self.logo_transformed = self.logo.transform((width,height),Image.PERSPECTIVE,coeffs,Image.BICUBIC)
 
         #Randomly rotate the resultant image
-        theta = np.random.uniform(-90.0,90.0)
+        theta = np.random.uniform(-30.0,30.0)
         self.logo_transformed = self.logo_transformed.rotate(theta,expand=True)
 
         #Randomly resize the image so that it takes up a different amount of space
@@ -122,14 +122,14 @@ class Image_Handler:
         label = [0,float(r_x)/img_x, float(r_y)/img_y, float(self.logo_transformed.size[0])/img_x, float(self.logo_transformed.size[1])/img_y]
         self.label_list.append(label)
 
-    def print_label(self):
+    def print_label(self,filename):
         N = len(self.label_list)
-        with open("label_test.txt","w") as f:
+        with open(filename,"w") as f:
             for l in self.label_list:
                 s = "{}\t{}\t{}\t{}\t{}\n".format(l[0],l[1],l[2],l[3],l[4])
                 f.write(s)
 
-
+"""
 def generate_test_image(img_data, n_logo):
     #Generates a new image with the logo superimposed n_logo times
     for i in range(n_logo):
@@ -152,3 +152,4 @@ if __name__ == '__main__':
     new_img = generate_test_image(A,20)
     new_img.print_label()
     new_img.bg.show()
+"""
