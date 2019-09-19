@@ -20,7 +20,7 @@ if __name__ == "__main__":
         print(i)
         j = np.random.randint(len(names))
         filename = names[j]
-        im = Image_Handler(filename,0.1)
+        im = Image_Handler(filename,0.2)
         im.create_logo(logo_file)
         n_logo = np.random.randint(1,13)
         generate_training_image(im,n_logo)

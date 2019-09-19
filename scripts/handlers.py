@@ -38,14 +38,14 @@ class Image_Handler:
         b = int(a*b)
         a = int(a)
         self.logo_size = (a,b)
-        self.logo = self.logo.resize(self.logo_size)
+        #self.logo = self.logo.resize(self.logo_size)
 
     def transform_logo(self):
         #Perform a single random transformation on the logo
         #These parameters create bounds for the random transformation
 
-        width = self.logo_size[0]
-        height = self.logo_size[1]
+        width = self.logo.size[0]
+        height = self.logo.size[1]
 
         if np.random.uniform() < 0.5:
             #perform affine transformation
@@ -85,8 +85,8 @@ class Image_Handler:
 
         #Randomly resize the image so that it takes up a different amount of space
         current_size = self.logo_transformed.size
-        r1 = int(np.random.uniform(0.2,1.4)*current_size[0])
-        r2 = int(np.random.uniform(0.2,1.4)*current_size[1])
+        r1 = int(np.random.uniform(0.2,1.4)*self.logo_size[0])
+        r2 = int(np.random.uniform(0.2,1.4)*self.logo_size[1])
         self.logo_transformed = self.logo_transformed.resize((r1,r2))
 
 
