@@ -21,7 +21,7 @@ class Image_Handler:
     def __init__(self, filename,  prop):
         self.bg_static = load_img(filename)
         self.bg = load_img(filename)
-        #self.bg = self.bg.resize(bg_size)
+        self.bg = self.bg.resize((256,256))
         self.pix_bg = img_to_array(self.bg)
 
         self.prop = prop
@@ -47,10 +47,10 @@ class Image_Handler:
         width = self.logo.size[0]
         height = self.logo.size[1]
 
-        if np.random.uniform() < 0.5:
+        if np.random.uniform() < 0.0:
             #perform affine transformation
             #print("AFFINE")
-            m = np.random.uniform(-0.9,0.9)
+            m = np.random.uniform(-0.3,0.3)
             xshift = abs(m)*width
             new_width = width + int(round(xshift))
             coeffs = (1,m,-xshift if m>0 else 0,0,1,0)
@@ -63,11 +63,11 @@ class Image_Handler:
             #print("PERSPECTIVE")
             r = np.random.uniform()
             if r < 0.5:
-                width_shift = width*np.random.uniform(0.0,0.4)
+                width_shift = width*np.random.uniform(0.0,0.2)
                 height_shift = 0
             else:
                 width_shift = 0
-                height_shift = height*np.random.uniform(0.0,0.4)
+                height_shift = height*np.random.uniform(0.0,0.2)
             #print((width_shift,height_shift))
             r = np.random.uniform()
             if r < 0.5:
@@ -103,15 +103,16 @@ class Image_Handler:
         r_x = np.random.randint(xlim)
         r_y = np.random.randint(ylim)
         #print(r_x,r_y)
-        r = np.random.randint(255)
-        g = np.random.randint(255)
-        b = np.random.randint(255)
+        #r = np.random.randint(255)
+        #g = np.random.randint(255)
+        #b = np.random.randint(255)
         for j in range(self.logo_transformed.size[0]-1):
             for i in range(self.logo_transformed.size[1]-1):
                 #print(i,j)
                 if logo_px[i][j][0] != 0 or logo_px[i][j][1] != 0 or logo_px[i][j][2] != 0:
                     #bg_px[r_y+i,r_x+j,:] = logo_px[i,j,:]
-                    bg_px[r_y+i,r_x+j,:] = (r,g,b)
+                    #bg_px[r_y+i,r_x+j,:] = (r,g,b)
+                    bg_px[r_y+i,r_x+j,:] = (255,255,255)
 
         self.bg = array_to_img(bg_px)
 
@@ -119,15 +120,15 @@ class Image_Handler:
         img_x = float(self.bg.size[0])
         img_y = float(self.bg.size[1])
 
-        label = [0,float(r_x)/img_x, float(r_y)/img_y, float(self.logo_transformed.size[0])/img_x, float(self.logo_transformed.size[1])/img_y]
+        label = [r_x, r_y, self.logo_transformed.size[0]+r_x, self.logo_transformed.size[1]+r_y]
         self.label_list.append(label)
 
-    def print_label(self,filename):
-        N = len(self.label_list)
-        with open(filename,"w") as f:
-            for l in self.label_list:
-                s = "{}\t{}\t{}\t{}\t{}\n".format(l[0],l[1],l[2],l[3],l[4])
-                f.write(s)
+    #def print_label(self,filename):
+        #N = len(self.label_list)
+        #with open(filename,"w") as f:
+            #for l in self.label_list:
+                #s = "{}\t{}\t{}\t{}\t{}\n".format(l[0],l[1],l[2],l[3],l[4])
+                #f.write(s)
 
 """
 def generate_test_image(img_data, n_logo):
