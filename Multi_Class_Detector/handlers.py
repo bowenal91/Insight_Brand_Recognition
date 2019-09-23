@@ -21,7 +21,7 @@ class Image_Handler:
     def __init__(self, filename, prop):
         self.bg_static = load_img(filename)
         self.bg = load_img(filename)
-        self.bg = self.bg.resize((256,256))
+        self.bg = self.bg.resize((512,512))
         self.pix_bg = img_to_array(self.bg)
 
         self.prop = prop
@@ -50,27 +50,56 @@ class Image_Handler:
         width = self.logo.size[0]
         height = self.logo.size[1]
 
-        if np.random.uniform() < 0.0:
+        if np.random.uniform() < 0.7:
+
+            #Perform perspective transformation
+            #print("PERSPECTIVE")
+            r = np.random.uniform()
+            if r < 0.5:
+                width_shift = width*np.random.uniform(-0.3,0.3)
+                height_shift = 0
+            else:
+                width_shift = 0
+                height_shift = height*np.random.uniform(-2.0,2.0)
+            if height_shift < 0:
+                h_origin = -height_shift
+            else:
+                h_origin = 0
+            if width_shift < 0:
+                w_origin = -width_shift
+            else:
+                w_origin = 0
+            #print((width_shift,height_shift))
+            r = np.random.uniform()
+            coeffs = find_coeffs([(w_origin,h_origin), (width+w_origin,height_shift+h_origin), (width_shift+w_origin,height+h_origin), (width+width_shift+w_origin,height+height_shift+
+                h_origin)],[(0,0), (width,0), (0,height), (width,height)])
+
+            self.logo_transformed = self.logo.transform((width+abs(int(width_shift)),height+abs(int(height_shift))),Image.PERSPECTIVE,coeffs,Image.BICUBIC)
+
+
+            """
             #perform affine transformation
             #print("AFFINE")
             m = np.random.uniform(-0.3,0.3)
-            xshift = abs(m)*width
-            new_width = width + int(round(xshift))
-            coeffs = (1,m,-xshift if m>0 else 0,0,1,0)
+            xshift = abs(m)*height
+            new_height = height + int(round(xshift))
+            #coeffs = (1,m,-xshift if m>0 else 0,0,1,0)
+            coeffs = (1,0,0,0,1,0)
 
-            self.logo_transformed = self.logo.transform((new_width,height),Image.AFFINE,coeffs,Image.BICUBIC)
+            self.logo_transformed = self.logo.transform((width,new_height),Image.AFFINE,coeffs,Image.BICUBIC)
             #print(self.logo_transformed.size)
+            """
 
         else:
             #Perform perspective transformation
             #print("PERSPECTIVE")
             r = np.random.uniform()
             if r < 0.5:
-                width_shift = width*np.random.uniform(0.0,0.2)
+                width_shift = width*np.random.uniform(0.0,0.1)
                 height_shift = 0
             else:
                 width_shift = 0
-                height_shift = height*np.random.uniform(0.0,0.2)
+                height_shift = height*np.random.uniform(0.0,0.1)
             #print((width_shift,height_shift))
             r = np.random.uniform()
             if r < 0.5:
@@ -83,13 +112,13 @@ class Image_Handler:
             self.logo_transformed = self.logo.transform((width,height),Image.PERSPECTIVE,coeffs,Image.BICUBIC)
 
         #Randomly rotate the resultant image
-        theta = np.random.uniform(-30.0,30.0)
-        self.logo_transformed = self.logo_transformed.rotate(theta,expand=True)
+        #theta = np.random.uniform(-40.0,40.0)
+        #self.logo_transformed = self.logo_transformed.rotate(theta,expand=True)
 
         #Randomly resize the image so that it takes up a different amount of space
         current_size = self.logo_transformed.size
-        r1 = int(np.random.uniform(0.7,1.4)*self.logo_size[0])
-        r2 = int(np.random.uniform(0.7,1.4)*self.logo_size[1])
+        r1 = int(np.random.uniform(0.7,2.0)*self.logo_size[0])
+        r2 = int(np.random.uniform(0.7,2.0)*self.logo_size[1])
         self.logo_transformed = self.logo_transformed.resize((r1,r2))
 
 
