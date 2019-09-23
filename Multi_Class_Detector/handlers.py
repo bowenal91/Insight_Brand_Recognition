@@ -18,7 +18,7 @@ def find_coeffs(pa,pb):
 #Class to manage images and prepare them for training
 
 class Image_Handler:
-    def __init__(self, filename,  prop):
+    def __init__(self, filename, prop):
         self.bg_static = load_img(filename)
         self.bg = load_img(filename)
         self.bg = self.bg.resize((256,256))
@@ -35,7 +35,7 @@ class Image_Handler:
 
     def create_logo(self,filename,classID):
         self.logo = load_img(filename)
-        a = self.prop*float(self.bg.size[0])
+        a = self.prop*float(self.bg.size[1])
         b = float(self.logo.size[1])/float(self.logo.size[0])
         b = int(a*b)
         a = int(a)
@@ -88,8 +88,8 @@ class Image_Handler:
 
         #Randomly resize the image so that it takes up a different amount of space
         current_size = self.logo_transformed.size
-        r1 = int(np.random.uniform(0.2,1.4)*self.logo_size[0])
-        r2 = int(np.random.uniform(0.2,1.4)*self.logo_size[1])
+        r1 = int(np.random.uniform(0.7,1.4)*self.logo_size[0])
+        r2 = int(np.random.uniform(0.7,1.4)*self.logo_size[1])
         self.logo_transformed = self.logo_transformed.resize((r1,r2))
 
 
@@ -106,16 +106,16 @@ class Image_Handler:
         r_x = np.random.randint(xlim)
         r_y = np.random.randint(ylim)
         #print(r_x,r_y)
-        #r = np.random.randint(255)
-        #g = np.random.randint(255)
-        #b = np.random.randint(255)
+        r = np.random.randint(180,255)
+        g = np.random.randint(180,255)
+        b = np.random.randint(180,255)
         for j in range(self.logo_transformed.size[0]-1):
             for i in range(self.logo_transformed.size[1]-1):
                 #print(i,j)
                 if logo_px[i][j][0] > 10 or logo_px[i][j][1] > 10 or logo_px[i][j][2] > 10:
                     #bg_px[r_y+i,r_x+j,:] = logo_px[i,j,:]
-                    #bg_px[r_y+i,r_x+j,:] = (r,g,b)
-                    bg_px[r_y+i,r_x+j,:] = (255,255,255)
+                    bg_px[r_y+i,r_x+j,:] = (r,g,b)
+                    #bg_px[r_y+i,r_x+j,:] = (255,255,255)
 
         self.bg = array_to_img(bg_px)
 

@@ -35,14 +35,14 @@ if __name__ == "__main__":
     src_dir = sys.argv[1]
     dest_dir = sys.argv[2]
     #logo_file = sys.argv[3]
-    N = 500
+    N = 300
     names = glob.glob(src_dir+"*")
     with open("labels.lst","w") as out:
         for i in range(N):
             print(i)
             j = np.random.randint(len(names))
             filename = names[j]
-            im = Image_Handler(filename,0.3)
+            im = Image_Handler(filename,0.35)
             im.create_logo("Visa.png",0)
             n_logo = np.random.randint(1,4)
             n_logo2 = np.random.randint(1,4)
@@ -57,7 +57,7 @@ if __name__ == "__main__":
             img = mx.image.imread(dest_dir+str(i)+".jpg")
             #out.write(dest_dir+str(i)+".jpg\t")
             all_boxes = np.array(im.label_list)
-            all_ids = np.array([0]*len(im.label_list))
+            all_ids = np.array(im.class_list)
             #print(all_boxes)
             line = write_line(dest_dir+str(i)+".jpg",img.shape,all_boxes,all_ids,i)
 
