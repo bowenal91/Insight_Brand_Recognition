@@ -113,8 +113,8 @@ class Image_Handler:
             self.logo_transformed = self.logo.transform((width,height),Image.PERSPECTIVE,coeffs,Image.BICUBIC)
 
         #Randomly rotate the resultant image
-        #theta = np.random.uniform(-40.0,40.0)
-        #self.logo_transformed = self.logo_transformed.rotate(theta,expand=True)
+        theta = np.random.uniform(-30.0,30.0)
+        self.logo_transformed = self.logo_transformed.rotate(theta,expand=True)
 
         #Randomly resize the image so that it takes up a different amount of space
         current_size = self.logo_transformed.size
