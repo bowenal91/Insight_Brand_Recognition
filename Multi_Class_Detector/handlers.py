@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+from PIL import ImageFilter
 from keras.preprocessing.image import ImageDataGenerator,array_to_img,img_to_array,load_img
 
 
@@ -95,11 +96,11 @@ class Image_Handler:
             #print("PERSPECTIVE")
             r = np.random.uniform()
             if r < 0.5:
-                width_shift = width*np.random.uniform(0.0,0.1)
+                width_shift = width*np.random.uniform(0.0,0.2)
                 height_shift = 0
             else:
                 width_shift = 0
-                height_shift = height*np.random.uniform(0.0,0.1)
+                height_shift = height*np.random.uniform(0.0,0.2)
             #print((width_shift,height_shift))
             r = np.random.uniform()
             if r < 0.5:

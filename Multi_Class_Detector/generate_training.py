@@ -52,6 +52,12 @@ if __name__ == "__main__":
             generate_training_image(im,n_logo2)
             im.create_logo("Hyundai.png",2)
             generate_training_image(im,n_logo3)
+
+            if np.random.uniform() < 0.5:
+                num_blurs = np.random.randint(1,3)
+                for dummy in range(num_blurs):
+                    im.bg = im.bg.filter(ImageFilter.GaussianBlur)
+
             #im.print_label(label_dir+str(i)+".txt")
             im.bg.save(dest_dir+str(i)+".jpg")
             img = mx.image.imread(dest_dir+str(i)+".jpg")
