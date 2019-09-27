@@ -21,6 +21,8 @@ trackers = cv2.MultiTracker_create()
 bbs = []
 new_scores = []
 new_classes = []
+saveheight = 0
+savewidth = 0
 for i in range(NUM_FRAMES):
     print(i)
     try:
@@ -71,8 +73,9 @@ for i in range(NUM_FRAMES):
         print("TRACK")
         detect_counter += 1
 
-        frame = mx.nd.array(frame).astype('uint8')
-        rgb_nd,frame = gcv.data.transforms.presets.ssd.transform_test(frame,short=512,max_size=700)
+        #frame = mx.nd.array(frame).astype('uint8')
+        #rgb_nd,frame = gcv.data.transforms.presets.ssd.transform_test(frame,short=512,max_size=700)
+        frame = cv2.resize(frame,(savewidth,saveheight))
         (success,bbs) = trackers.update(frame)
         #img = gcv.utils.viz.cv_plot_bbox(frame,bbs,new_scores,new_classes,class_names=net.classes,thresh=threshold)
 
@@ -91,6 +94,8 @@ for i in range(NUM_FRAMES):
             cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
     height,width,layers = frame.shape
     size = (width,height)
+    saveheight = height
+    savewidth = width
     img_array.append(frame)
 
 
