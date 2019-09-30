@@ -2,12 +2,16 @@ import time
 import cv2
 import gluoncv as gcv
 import mxnet as mx
+import numpy as np
+import matplotlib.pyplot as plt
 
 #Create an instance of a multi object tracker to start off with. Every time you need a new tracker it can be added to the multi object tracker
 threshold = 0.8
-detect_interval = 100
+detect_interval = 20
 detect_counter = 0
 classes = ['Visa','Powerade','Hyundai','Coke','Adidas']
+stats = np.zeros(len(classes))
+
 net = gcv.model_zoo.get_model('ssd_512_mobilenet1.0_custom', classes = classes, pretrained_base=False)
 net.load_parameters('logos.params')
 #net.collect_params().reset_ctx([mx.gpu(0)])
@@ -44,6 +48,8 @@ for i in range(NUM_FRAMES):
         new_classes = []
         for j in range(len(scores[0])):
             if scores[0][j] >= threshold:
+                thisClass = int(class_IDs[0][j].asnumpy())
+                stats[thisClass] += 1.0
                 test = bounding_boxes[0][j].asnumpy()
                 bbs.append(test)
                 new_scores.append(scores[0][j].asnumpy())
@@ -102,7 +108,15 @@ for i in range(NUM_FRAMES):
     #Check for a scene change - automatic object detection
 
 
-out = cv2.VideoWriter('detected.avi',cv2.VideoWriter_fourcc(*'DIVX'),60,size)
+x = np.arange(len(classes))
+y = stats
+plt.bar(x,y,edgecolor='k',linewidth=2,color=['black','red','green','blue','yellow'])
+plt.tick_params(axis='both',which='major',labelsize=12)
+plt.xticks(x,classes,fontsize=8)
+plt.ylabel("Appearances",fontsize=14)
+plt.savefig("Plot.png")
+
+out = cv2.VideoWriter('tracked.avi',cv2.VideoWriter_fourcc(*'DIVX'),60,size)
 
 for i in range(len(img_array)):
     out.write(img_array[i])
