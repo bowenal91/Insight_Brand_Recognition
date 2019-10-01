@@ -57,11 +57,11 @@ class Image_Handler:
             #print("PERSPECTIVE")
             r = np.random.uniform()
             if r < 0.5:
-                width_shift = width*np.random.uniform(-0.3,0.3)
+                width_shift = width*np.random.uniform(-0.5,0.5)
                 height_shift = 0
             else:
                 width_shift = 0
-                height_shift = height*np.random.uniform(-2.0,2.0)
+                height_shift = height*np.random.uniform(-5.0,5.0)
             if height_shift < 0:
                 h_origin = -height_shift
             else:
@@ -113,13 +113,13 @@ class Image_Handler:
             self.logo_transformed = self.logo.transform((width,height),Image.PERSPECTIVE,coeffs,Image.BICUBIC)
 
         #Randomly rotate the resultant image
-        theta = np.random.uniform(-30.0,30.0)
-        self.logo_transformed = self.logo_transformed.rotate(theta,expand=True)
+        #theta = np.random.uniform(-30.0,30.0)
+        #self.logo_transformed = self.logo_transformed.rotate(theta,expand=True)
 
         #Randomly resize the image so that it takes up a different amount of space
         current_size = self.logo_transformed.size
-        r1 = int(np.random.uniform(0.7,2.0)*self.logo_size[0])
-        r2 = int(np.random.uniform(0.7,2.0)*self.logo_size[1])
+        r1 = int(np.random.uniform(0.1,2.3)*self.logo_size[0])
+        r2 = int(np.random.uniform(0.1,2.3)*self.logo_size[1])
         self.logo_transformed = self.logo_transformed.resize((r1,r2))
 
 
@@ -136,9 +136,9 @@ class Image_Handler:
         r_x = np.random.randint(xlim)
         r_y = np.random.randint(ylim)
         #print(r_x,r_y)
-        r = np.random.randint(180,255)
-        g = np.random.randint(180,255)
-        b = np.random.randint(180,255)
+        r = np.random.randint(160,255)
+        g = np.random.randint(160,255)
+        b = np.random.randint(160,255)
         for j in range(self.logo_transformed.size[0]-1):
             for i in range(self.logo_transformed.size[1]-1):
                 #print(i,j)
@@ -154,8 +154,9 @@ class Image_Handler:
         img_y = float(self.bg.size[1])
 
         label = [r_x, r_y, self.logo_transformed.size[0]+r_x, self.logo_transformed.size[1]+r_y]
-        self.label_list.append(label)
-        self.class_list.append(self.logo_class)
+        if self.logo_class != -1:
+            self.label_list.append(label)
+            self.class_list.append(self.logo_class)
 
     #def print_label(self,filename):
         #N = len(self.label_list)

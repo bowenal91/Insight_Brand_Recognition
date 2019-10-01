@@ -35,7 +35,7 @@ if __name__ == "__main__":
     src_dir = sys.argv[1]
     dest_dir = sys.argv[2]
     #logo_file = sys.argv[3]
-    N = 300
+    N = 10
     names = glob.glob(src_dir+"*")
     with open("labels.lst","w") as out:
         for i in range(N):
@@ -44,14 +44,29 @@ if __name__ == "__main__":
             filename = names[j]
             im = Image_Handler(filename,0.2)
             im.create_logo("Visa.png",0)
-            n_logo = np.random.randint(1,3)
-            n_logo2 = np.random.randint(1,3)
-            n_logo3 = np.random.randint(1,3)
+            n_logo = np.random.randint(0,3)
+            n_logo2 = np.random.randint(0,3)
+            n_logo3 = np.random.randint(0,3)
+            n_logo4 = np.random.randint(0,3)
+            n_logo5 = np.random.randint(0,3)
+            n_logo6 = np.random.randint(0,3)
+            n_logo7 = np.random.randint(0,3)
+            n_logo8 = np.random.randint(0,3)
             generate_training_image(im,n_logo)
             im.create_logo("Powerade.png",1)
             generate_training_image(im,n_logo2)
             im.create_logo("Hyundai.png",2)
             generate_training_image(im,n_logo3)
+            im.create_logo("Coke.jpg",3)
+            generate_training_image(im,n_logo4)
+            im.create_logo("Adidas.jpg",4)
+            generate_training_image(im,n_logo5)
+            im.create_logo("Hisense2.png",-1)
+            generate_training_image(im,n_logo6)
+            im.create_logo("McDelivery2.png",-1)
+            generate_training_image(im,n_logo7)
+            im.create_logo("FIFA2.png",-1)
+            generate_training_image(im,n_logo7)
 
             if np.random.uniform() < 0.5:
                 num_blurs = np.random.randint(1,3)
