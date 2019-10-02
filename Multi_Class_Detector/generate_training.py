@@ -52,6 +52,9 @@ if __name__ == "__main__":
             n_logo6 = np.random.randint(0,3)
             n_logo7 = np.random.randint(0,3)
             n_logo8 = np.random.randint(0,3)
+            n_logo9 = np.random.randint(0,3)
+            if n_logo+n_logo2+n_logo3+n_logo4+n_logo5==0:
+                n_logo=1
             generate_training_image(im,n_logo)
             im.create_logo("Powerade.png",1)
             generate_training_image(im,n_logo2)
@@ -66,7 +69,9 @@ if __name__ == "__main__":
             im.create_logo("McDelivery2.png",-1)
             generate_training_image(im,n_logo7)
             im.create_logo("FIFA2.png",-1)
-            generate_training_image(im,n_logo7)
+            generate_training_image(im,n_logo8)
+            im.create_logo("Vivo2.png",-1)
+            generate_training_image(im,n_logo9)
 
             if np.random.uniform() < 0.5:
                 num_blurs = np.random.randint(1,3)

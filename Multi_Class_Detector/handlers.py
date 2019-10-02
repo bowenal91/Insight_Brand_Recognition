@@ -37,10 +37,10 @@ class Image_Handler:
     def create_logo(self,filename,classID):
         self.logo = load_img(filename)
         a = self.prop*float(self.bg.size[1])
-        b = float(self.logo.size[1])/float(self.logo.size[0])
+        b = float(self.logo.size[0])/float(self.logo.size[1])
         b = int(a*b)
         a = int(a)
-        self.logo_size = (a,b)
+        self.logo_size = (b,a)
         self.logo_class = classID
         #self.logo = self.logo.resize(self.logo_size)
 
@@ -56,12 +56,12 @@ class Image_Handler:
             #Perform perspective transformation
             #print("PERSPECTIVE")
             r = np.random.uniform()
-            if r < 0.5:
+            if r < 0.3:
                 width_shift = width*np.random.uniform(-0.5,0.5)
                 height_shift = 0
             else:
                 width_shift = 0
-                height_shift = height*np.random.uniform(-5.0,5.0)
+                height_shift = height*np.random.uniform(-2.5,2.5)
             if height_shift < 0:
                 h_origin = -height_shift
             else:
@@ -118,8 +118,12 @@ class Image_Handler:
 
         #Randomly resize the image so that it takes up a different amount of space
         current_size = self.logo_transformed.size
-        r1 = int(np.random.uniform(0.1,2.3)*self.logo_size[0])
-        r2 = int(np.random.uniform(0.1,2.3)*self.logo_size[1])
+        while True:
+            rand = np.random.uniform(0.1,1.8)
+            r1 = int(rand*self.logo_size[0])
+            r2 = int(rand*self.logo_size[1])
+            if r1 < self.bg.size[0] and r2 < self.bg.size[1]:
+                break
         self.logo_transformed = self.logo_transformed.resize((r1,r2))
 
 
