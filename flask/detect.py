@@ -79,7 +79,7 @@ class Detector:
         (success,bbs) = self.trackers.update(frame)
 
         #Convert frame and bounding box to mx array form
-        old_frame = mx.nd.array(old_frame).astype('uint8')
+        old_frame = mx.nd.array(frame).astype('uint8')
         rgb_nd,old_frame = gcv.data.transforms.presets.ssd.transform_test(old_frame,short=512,max_size=700)
         for j in range(len(self.scores[0])):
             if self.scores[0][j] > self.threshold:
