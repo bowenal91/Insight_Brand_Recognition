@@ -1,11 +1,11 @@
 from flask import render_template
 from flask import request, url_for
-from flaskexample import app
-from detect import run_detector
+from flaskapp import app
+from detect import Detector
 from werkzeug.utils import secure_filename
 import os
 
-UPLOAD_FOLDER = "/home/alecbowen/Documents/Insight_Project/Multi_Class_Detection/Flask_App/FINAL/flaskexample/uploads/"
+UPLOAD_FOLDER = "/home/alecbowen/Documents/Insight_Project/Multi_Class_Detection/Flask_App/FINAL/flaskapp/uploads/"
 ALLOWED_EXTENSIONS = set(['mp4','avi'])
 
 
@@ -29,8 +29,14 @@ def result_video():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(UPLOAD_FOLDER,filename))
-            run_detector(filename)
+            filename = os.path.join(UPLOAD_FOLDER,filename)
+            file.save(filename)
+            model = Detector(filename,1)
+            model.run_detector()
+            model.generate_plots()
+            model.write_video()
+
+
             return render_template('result_video.html')
             #return redirect(url_for('uploaded_file',filename=filename))
     return render_template('upload_video.html')
