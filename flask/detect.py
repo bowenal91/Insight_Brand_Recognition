@@ -9,7 +9,7 @@ import os
 
 class Detector:
     def __init__(self,videofile,mode):
-        self.threshold = 0.8
+        self.threshold = 0.9
 
         #mode is 0 for detect only, 1 for tracking as well
         self.mode = mode
@@ -21,55 +21,105 @@ class Detector:
         #net.collect_params().reset_ctx([mx.gpu(0)])
         self.cap = cv2.VideoCapture(videofile)
         #out = cv2.VideoWriter('detected.avi',cv2.VideoWriter_fourcc(*'DIVX'),15,size)
-        self.NUM_FRAMES = 10
-        self.inc = 1.0/float(NUM_FRAMES)
+        self.NUM_FRAMES = 2000
+        self.inc = 1.0/float(self.NUM_FRAMES)
         self.img_array = []
-        self.running = np.zeros((NUM_FRAMES,len(self.classes)))
+        self.out = None
+        self.firstFrame = True
+        self.running = np.zeros((self.NUM_FRAMES,len(self.classes)))
+        self.scores = None
+        self.class_IDs = None
+        self.bounding_boxes = None
+        self.cycle = 0
+        if self.mode == 1:
+            self.trackers = cv2.MultiTracker_create()
+            self.bbs = []
         return
 
     def detect_frame(self):
         try:
             ret,frame = self.cap.read()
         except:
-            break
+            pass
         frame = mx.nd.array(frame).astype('uint8')
         rgb_nd,frame = gcv.data.transforms.presets.ssd.transform_test(frame,short=512,max_size=700)
         #rgb_nd = rgb_nd.as_in_context(mx.gpu(0))
-        class_IDs,scores,bounding_boxes = self.net(rgb_nd)
-        for j in range(len(scores[0])):
-            if scores[0][j] >= self.threshold:
-                thisClass = int(class_IDs[0][j].asnumpy())
-                bb = bounding_boxes[0][j].asnumpy()
+        if self.mode == 1:
+            self.trackers = cv2.MultiTracker_create()
+            self.bbs = []
+
+        self.class_IDs,self.scores,self.bounding_boxes = self.net(rgb_nd)
+        for j in range(len(self.scores[0])):
+            if self.scores[0][j] >= self.threshold:
+                thisClass = int(self.class_IDs[0][j].asnumpy())
+                bb = self.bounding_boxes[0][j].asnumpy()
                 A = (bb[2]-bb[0])*(bb[3]-bb[1])
-                self.stats[thisClass] += A*inc
-                self.running[i][thisClass] += A*inc
+                self.stats[thisClass] += A*self.inc
+                self.running[self.cycle][thisClass] += A*self.inc
+                if self.mode == 1:
+                    tracker = cv2.TrackerCSRT.create()
+                    tracker_bb = (bb[0],bb[1],bb[2]-bb[0],bb[3]-bb[1])
+                    self.trackers.add(tracker,frame,tracker_bb)
+
             else:
                 break
-        img = gcv.utils.viz.cv_plot_bbox(frame,bounding_boxes[0],scores[0],class_IDs[0],class_names=self.net.classes,thresh=threshold)
+        img = gcv.utils.viz.cv_plot_bbox(frame,self.bounding_boxes[0],self.scores[0],self.class_IDs[0],class_names=self.net.classes,thresh=self.threshold)
 
         height,width,layers = img.shape
         self.size = (width,height)
-        return
+        return img
 
-    def detect_and_track(self):
-        return
+    def track_frame(self):
+        #Update the tracker to account for camera movement. Always assume mode=1
+        try:
+            ret,old_frame = self.cap.read()
+        except:
+            pass
+        frame = cv2.resize(old_frame,self.size)
+        (success,bbs) = self.trackers.update(frame)
 
-    def update_track(self):
-        return
+        #Convert frame and bounding box to mx array form
+        old_frame = mx.nd.array(old_frame).astype('uint8')
+        rgb_nd,old_frame = gcv.data.transforms.presets.ssd.transform_test(old_frame,short=512,max_size=700)
+        for j in range(len(self.scores[0])):
+            if self.scores[0][j] > self.threshold:
+                thisClass = int(self.class_IDs[0][j].asnumpy())
+                A = bbs[j][2]*bbs[j][3]
+                self.stats[thisClass] += A*self.inc
+                self.running[self.cycle][thisClass] += A*self.inc
+
+                self.bounding_boxes[0][j][0] = bbs[j][0]
+                self.bounding_boxes[0][j][1] = bbs[j][1]
+                self.bounding_boxes[0][j][2] = bbs[j][0]+bbs[j][2]
+                self.bounding_boxes[0][j][3] = bbs[j][1]+bbs[j][3]
+            else:
+                break
+
+        img = gcv.utils.viz.cv_plot_bbox(old_frame,self.bounding_boxes[0],self.scores[0],self.class_IDs[0],class_names=self.net.classes,thresh=self.threshold)
+
+        return img
 
     def run_detector(self):
-        for i in range(NUM_FRAMES):
-            detect_frame()
-        for i in range(1,NUM_FRAMES):
-            running[i] = running[i] + running[i-1]
+
+        for self.cycle in range(self.NUM_FRAMES):
+            print(self.cycle)
+            if (self.cycle%20==0 or self.mode == 0):
+                img = self.detect_frame()
+            else:
+                img = self.track_frame()
+            if self.firstFrame:
+                self.out = cv2.VideoWriter('flaskapp/static/detected.avi',cv2.VideoWriter_fourcc(*'DIVX'),45,self.size)
+                self.firstFrame = False
+            self.out.write(img)
+        for i in range(1,self.NUM_FRAMES):
+            self.running[i] = self.running[i] + self.running[i-1]
 
 
-        self.out = cv2.VideoWriter('flaskapp/static/detected.avi',cv2.VideoWriter_fourcc(*'DIVX'),45,self.size)
         return
 
     def generate_plots(self):
         x = np.arange(len(self.classes))
-        y = stats
+        y = self.stats
         plt.figure()
 #plt.subplot(211)
         plt.bar(x,y,edgecolor='k',linewidth=2,color=['black','red','green','blue','yellow'])
@@ -78,15 +128,15 @@ class Detector:
         plt.ylabel("Appearances",fontsize=14)
         plt.savefig("flaskapp/static/Cumulative_Bar.png")
 
-        x2 = np.array(range(NUM_FRAMES))/45.0
+        x2 = np.array(range(self.NUM_FRAMES))/45.0
         plt.figure()
 #plt.subplot(212)
         cs = ['black','red','green','blue','yellow']
         for i in range(len(self.classes)):
-            plt.plot(x2,running[:,i],color=cs[i],linewidth=2)
+            plt.plot(x2,self.running[:,i],color=cs[i],linewidth=2)
 
         plt.legend(self.classes)
-        plt.xlim(0.0,float(NUM_FRAMES)/45.0)
+        plt.xlim(0.0,float(self.NUM_FRAMES)/45.0)
         plt.tick_params(axis='both',which='major',labelsize=12)
         plt.xlabel("Time (seconds)",fontsize=14)
         plt.ylabel("Appearances")
@@ -94,8 +144,6 @@ class Detector:
         return
 
     def write_video(self):
-        for i in range(len(img_array)):
-            out.write(img_array[i])
         self.cap.release()
         self.out.release()
         cv2.destroyAllWindows()
