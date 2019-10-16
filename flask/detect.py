@@ -37,6 +37,7 @@ class Detector:
         return
 
     def detect_frame(self):
+        """Performs single shot detector to determine boundng boxes"""
         try:
             ret,frame = self.cap.read()
         except:
@@ -70,7 +71,7 @@ class Detector:
         return img
 
     def track_frame(self):
-        #Update the tracker to account for camera movement. Always assume mode=1
+        """Updates the tracker to the new frame. Does not predict additional bounding boxes."""
         try:
             ret,old_frame = self.cap.read()
         except:
@@ -100,7 +101,7 @@ class Detector:
         return img
 
     def run_detector(self):
-
+        """Mode 0 refers to detection only. Mode 1 allows for tracking most of the time with detection every 20 frames"""
         for self.cycle in range(self.NUM_FRAMES):
             print(self.cycle)
             if (self.cycle%20==0 or self.mode == 0):
@@ -118,6 +119,7 @@ class Detector:
         return
 
     def generate_plots(self):
+        """Creates and outputs the bar and run charts"""
         x = np.arange(len(self.classes))
         y = self.stats
         plt.figure()
@@ -144,6 +146,7 @@ class Detector:
         return
 
     def write_video(self):
+        """Converts avi file used by openCV to compressed mp4 so it can be seen in web browsers"""
         self.cap.release()
         self.out.release()
         cv2.destroyAllWindows()

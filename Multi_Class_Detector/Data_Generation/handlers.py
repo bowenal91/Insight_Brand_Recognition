@@ -5,6 +5,7 @@ from keras.preprocessing.image import ImageDataGenerator,array_to_img,img_to_arr
 
 
 def find_coeffs(pa,pb):
+    """Determines coefficients to be used in nonlinear perpective transformation"""
     matrix = []
     for p1,p2 in zip(pa,pb):
         matrix.append([p1[0],p1[1],1,0,0,0,-p2[0]*p1[0],-p2[0]*p1[1]])
@@ -35,6 +36,7 @@ class Image_Handler:
         self.logo_class = None
 
     def create_logo(self,filename,classID):
+        """standardizes the logo to be superimposed"""
         self.logo = load_img(filename)
         a = self.prop*float(self.bg.size[1])
         b = float(self.logo.size[0])/float(self.logo.size[1])
@@ -76,7 +78,6 @@ class Image_Handler:
                 h_origin)],[(0,0), (width,0), (0,height), (width,height)])
 
             self.logo_transformed = self.logo.transform((width+abs(int(width_shift)),height+abs(int(height_shift))),Image.PERSPECTIVE,coeffs,Image.BICUBIC)
-
 
             """
             #perform affine transformation
@@ -169,27 +170,3 @@ class Image_Handler:
                 #s = "{}\t{}\t{}\t{}\t{}\n".format(l[0],l[1],l[2],l[3],l[4])
                 #f.write(s)
 
-"""
-def generate_test_image(img_data, n_logo):
-    #Generates a new image with the logo superimposed n_logo times
-    for i in range(n_logo):
-        img_data.transform_logo()
-        img_data.add_logo()
-    return img_data
-
-
-
-if __name__ == '__main__':
-    A = Image_Handler("Soccer.jpg",(1140,641),0.1)
-    A.create_logo("Visa.png")
-    #A.transform_logo()
-    #A.logo.show()
-    #A.logo_transformed.show()
-    #A.add_logo()
-    #A.bg.show()
-    stuff = img_to_array(A.logo)
-    #print(stuff[0,0,:])
-    new_img = generate_test_image(A,20)
-    new_img.print_label()
-    new_img.bg.show()
-"""
