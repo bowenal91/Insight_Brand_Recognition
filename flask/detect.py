@@ -8,14 +8,15 @@ from ffmpy import FFmpeg
 import os
 
 class Detector:
-    def __init__(self,videofile):
-        self.threshold = 0.8
+    def __init__(self,videofile,mode):
         self.threshold = 0.8
 
+        #mode is 0 for detect only, 1 for tracking as well
+        self.mode = mode
         self.classes = ['Visa','Powerade','Hyundai','Coke','Adidas']
-        self.stats = np.zeros(len(classes))
+        self.stats = np.zeros(len(self.classes))
 
-        self.net = gcv.model_zoo.get_model('ssd_512_mobilenet1.0_custom', classes = classes, pretrained_base=False)
+        self.net = gcv.model_zoo.get_model('ssd_512_mobilenet1.0_custom', classes = self.classes, pretrained_base=False)
         self.net.load_parameters('logos.params')
         #net.collect_params().reset_ctx([mx.gpu(0)])
         self.cap = cv2.VideoCapture(videofile)
@@ -23,12 +24,12 @@ class Detector:
         self.NUM_FRAMES = 10
         self.inc = 1.0/float(NUM_FRAMES)
         self.img_array = []
-        self.running = np.zeros((NUM_FRAMES,len(classes)))
+        self.running = np.zeros((NUM_FRAMES,len(self.classes)))
         return
 
     def detect_frame(self):
         try:
-            ret,frame = cap.read()
+            ret,frame = self.cap.read()
         except:
             break
         frame = mx.nd.array(frame).astype('uint8')
@@ -44,12 +45,17 @@ class Detector:
                 self.running[i][thisClass] += A*inc
             else:
                 break
-        img = gcv.utils.viz.cv_plot_bbox(frame,bounding_boxes[0],scores[0],class_IDs[0],class_names=net.classes,thresh=threshold)
+        img = gcv.utils.viz.cv_plot_bbox(frame,bounding_boxes[0],scores[0],class_IDs[0],class_names=self.net.classes,thresh=threshold)
 
         height,width,layers = img.shape
         self.size = (width,height)
         return
 
+    def detect_and_track(self):
+        return
+
+    def update_track(self):
+        return
 
     def run_detector(self):
         for i in range(NUM_FRAMES):
@@ -62,13 +68,13 @@ class Detector:
         return
 
     def generate_plots(self):
-        x = np.arange(len(classes))
+        x = np.arange(len(self.classes))
         y = stats
         plt.figure()
 #plt.subplot(211)
         plt.bar(x,y,edgecolor='k',linewidth=2,color=['black','red','green','blue','yellow'])
         plt.tick_params(axis='both',which='major',labelsize=12)
-        plt.xticks(x,classes,fontsize=8)
+        plt.xticks(x,self.classes,fontsize=8)
         plt.ylabel("Appearances",fontsize=14)
         plt.savefig("flaskapp/static/Cumulative_Bar.png")
 
@@ -76,10 +82,10 @@ class Detector:
         plt.figure()
 #plt.subplot(212)
         cs = ['black','red','green','blue','yellow']
-        for i in range(len(classes)):
+        for i in range(len(self.classes)):
             plt.plot(x2,running[:,i],color=cs[i],linewidth=2)
 
-        plt.legend(classes)
+        plt.legend(self.classes)
         plt.xlim(0.0,float(NUM_FRAMES)/45.0)
         plt.tick_params(axis='both',which='major',labelsize=12)
         plt.xlabel("Time (seconds)",fontsize=14)
@@ -90,8 +96,8 @@ class Detector:
     def write_video(self):
         for i in range(len(img_array)):
             out.write(img_array[i])
-        cap.release()
-        out.release()
+        self.cap.release()
+        self.out.release()
         cv2.destroyAllWindows()
         try:
             os.remove('flaskapp/static/final_video.mp4')
